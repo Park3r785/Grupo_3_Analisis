@@ -5,7 +5,6 @@ def ladron_programacion_dinamica(botines):
     if cantidad_casas == 1:
         return botines[0], [botines[0]], [1]
 
-    # ganancia_acumulada[i] = mejor ganancia posible considerando hasta la casa i
     ganancia_acumulada = [0] * cantidad_casas
     ganancia_acumulada[0] = botines[0]
 
@@ -25,8 +24,7 @@ def ladron_programacion_dinamica(botines):
             ganancia_acumulada[indice] = ganancia_si_robo
         else:
             ganancia_acumulada[indice] = ganancia_si_no_robo
-
-    # Reconstrucción de la ruta, recorriendo desde la última casa hacia atrás
+            
     casas_robadas = []
     posicion = cantidad_casas - una_casa_atras
 
