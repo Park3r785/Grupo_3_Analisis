@@ -1,85 +1,92 @@
-def ladron_programacion_dinamica(casas):
-    n = len(casas)
-    if n == 0:
+def ladron_programacion_dinamica(botines):
+    cantidad_casas = len(botines)
+    if cantidad_casas == 0:
         return 0, [], []
-    if n == 1:
-        return casas[0], [casas[0]], [1]
+    if cantidad_casas == 1:
+        return botines[0], [botines[0]], [1]
 
-    tabla = [0] * n
-    tabla[0] = casas[0]
-    
-    if casas[0] > casas[1]:
-        tabla[1] = casas[0]
+    # ganancia_acumulada[i] = mejor ganancia posible considerando hasta la casa i
+    ganancia_acumulada = [0] * cantidad_casas
+    ganancia_acumulada[0] = botines[0]
+
+    if botines[0] > botines[1]:
+        ganancia_acumulada[1] = botines[0]
     else:
-        tabla[1] = casas[1]
+        ganancia_acumulada[1] = botines[1]
 
-    paso_uno = 1
-    paso_dos = 2
+    una_casa_atras = 1
+    dos_casas_atras = 2
 
-    for i in range(2, n):
-        robar = casas[i] + tabla[i - paso_dos]
-        no_robar = tabla[i - paso_uno]
-        
-        if robar > no_robar:
-            tabla[i] = robar
+    for indice in range(2, cantidad_casas):
+        ganancia_si_robo = botines[indice] + ganancia_acumulada[indice - dos_casas_atras]
+        ganancia_si_no_robo = ganancia_acumulada[indice - una_casa_atras]
+
+        if ganancia_si_robo > ganancia_si_no_robo:
+            ganancia_acumulada[indice] = ganancia_si_robo
         else:
-            tabla[i] = no_robar
+            ganancia_acumulada[indice] = ganancia_si_no_robo
 
-    elegidas = []
-    pos = n - paso_uno
-    
-    while pos >= 0:
-        if pos == 0:
-            if casas[0] > 0:
-                elegidas.append(1)
-            pos = -1
-        elif tabla[pos] == tabla[pos - paso_uno]:
-            pos = pos - paso_uno
+    # Reconstrucción de la ruta, recorriendo desde la última casa hacia atrás
+    casas_robadas = []
+    posicion = cantidad_casas - una_casa_atras
+
+    while posicion >= 0:
+        if posicion == 0:
+            if botines[0] > 0:
+                casas_robadas.append(1)
+            posicion = -1
+        elif ganancia_acumulada[posicion] == ganancia_acumulada[posicion - una_casa_atras]:
+            posicion = posicion - una_casa_atras
         else:
-            elegidas.append(pos + paso_uno)
-            pos = pos - paso_dos
-            
-    elegidas.reverse()
+            casas_robadas.append(posicion + una_casa_atras)
+            posicion = posicion - dos_casas_atras
 
-    return tabla[n - paso_uno], tabla, elegidas
+    casas_robadas.reverse()
+
+    return ganancia_acumulada[cantidad_casas - una_casa_atras], ganancia_acumulada, casas_robadas
 
 
-print("=========================================")
-print("   OPTIMIZACION DE ROBO (DINAMICA)     ")
-print("=========================================")
+def main():
+    print("=========================================")
+    print("   OPTIMIZACION DE ROBO (DINAMICA)     ")
+    print("=========================================")
 
-n = int(input("Ingrese la cantidad de casas (1 a 100): "))
+    cantidad_casas = int(input("Ingrese la cantidad de casas (1 a 100): "))
 
-while n < 1 or n > 100:
-    print("Error: La cantidad debe ser entre 1 y 100.")
-    n = int(input("Ingrese de nuevo la cantidad de casas: "))
+    while cantidad_casas < 1 or cantidad_casas > 100:
+        print("Error: La cantidad debe ser entre 1 y 100.")
+        cantidad_casas = int(input("Ingrese de nuevo la cantidad de casas: "))
 
-casas = []
+    botines = []
 
-for i in range(n):
-    dinero = int(input(f"Dinero en la casa {i + 1}: "))
-    
-    while dinero <= 0:
-        print("Error: El dinero debe ser mayor a cero.")
-        dinero = int(input(f"Ingrese de nuevo el dinero en la casa {i + 1}: "))
-        
-    casas.append(dinero)
+    for indice in range(cantidad_casas):
+        botin = int(input(f"Dinero en la casa {indice + 1}: "))
 
-ganancia, tabla, elegidas = ladron_programacion_dinamica(casas)
+        while botin <= 0:
+            print("Error: El dinero debe ser mayor a cero.")
+            botin = int(input(f"Ingrese de nuevo el dinero en la casa {indice + 1}: "))
 
-print("\n=== TABLA DE CALCULOS (PROGRAMACION DINAMICA) ===")
-print("Casa | Botin | Acumulado Maximo")
-print("-----|-------|-----------------")
-for i in range(len(tabla)):
-    print(f"  {i + 1}  |  S/{casas[i]:<3} |  S/{tabla[i]}")
+        botines.append(botin)
 
-print("\n=== VEREDICTO FINAL ===")
-print("Ruta de robo optima (Casas): ", end="")
-for i in range(len(elegidas)):
-    if i < len(elegidas) - 1:
-        print(f"{elegidas[i]} -> ", end="")
-    else:
-        print(f"{elegidas[i]}")
-        
-print(f"GANANCIA MAXIMA ASEGURADA: S/{ganancia}")
-print("=========================================")
+    ganancia_maxima, ganancia_acumulada, casas_robadas = ladron_programacion_dinamica(botines)
+
+    print("\n=== TABLA DE CALCULOS (PROGRAMACION DINAMICA) ===")
+    print("Casa | Botin | Acumulado Maximo")
+    print("-----|-------|-----------------")
+    for indice in range(len(ganancia_acumulada)):
+        print(f"  {indice + 1}  |  S/{botines[indice]:<3} |  S/{ganancia_acumulada[indice]}")
+
+    print("\n=== VEREDICTO FINAL ===")
+    print("Ruta de robo optima (Casas): ", end="")
+    for indice in range(len(casas_robadas)):
+        if indice < len(casas_robadas) - 1:
+            print(f"{casas_robadas[indice]} -> ", end="")
+        else:
+            print(f"{casas_robadas[indice]}")
+
+    print(f"GANANCIA MAXIMA ASEGURADA: S/{ganancia_maxima}")
+    print("=========================================")
+
+
+if __name__ == "__main__":
+    main()
